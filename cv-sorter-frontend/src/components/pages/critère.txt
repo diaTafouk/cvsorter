@@ -1,0 +1,195 @@
+import React, { useState } from 'react';
+import { useApp } from "../../context/AppContext";
+import { Save, Plus, X, Sliders } from 'lucide-react';
+
+export const CriteriaPage = () => {
+  const { criteria, updateCriteria } = useApp();
+  const [selectedJob, setSelectedJob] = useState('Développeur Fullstack');
+  const [currentCriteria, setCurrentCriteria] = useState(criteria[selectedJob]);
+  const [newSkill, setNewSkill] = useState('');
+  const [savedSuccess, setSavedSuccess] = useState(false);
+
+  const handleJobChange = (job) => {
+    setSelectedJob(job);
+    setCurrentCriteria(criteria[job]);
+  };
+
+  const handleAddSkill = () => {
+    if (!newSkill.trim()) return;
+    if (currentCriteria.requiredSkills.includes(newSkill.trim())) return;
+
+    setCurrentCriteria({
+      ...currentCriteria,
+      requiredSkills: [...currentCriteria.requiredSkills, newSkill.trim()]
+    });
+    setNewSkill('');
+  };
+
+  const handleRemoveSkill = (skillToRemove) => {
+    setCurrentCriteria({
+      ...currentCriteria,
+      requiredSkills: currentCriteria.requiredSkills.filter(s => s !== skillToRemove)
+    });
+  };
+
+  const handleSave = () => {
+    updateCriteria(selectedJob, currentCriteria);
+    setSavedSuccess(true);
+    setTimeout(() => setSavedSuccess(false), 3000);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 py-10">
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div className="bg-slate-900 p-6 text-white flex items-center justify-between">
+          <div>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <Sliders className="w-5 h-5 text-indigo-400" />
+              Configuration des Critères de Tri IA
+            </h2>
+            <p className="text-slate-400 text-sm mt-1">
+              Définissez les mots-clés, années d’expériences et pondérations utilisés par l’IA local.
+            </p>
+          </div>
+          {savedSuccess && (
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-medium">
+              Critères sauvegardés !
+            </span>
+          )}
+        </div>
+
+        <div className="p-8 space-y-8">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Sélectionner le Poste</label>
+            <div className="flex gap-4">
+              {Object.keys(criteria).map((job) => (
+                <button
+                  key={job}
+                  onClick={() => handleJobChange(job)}
+                  className={`px-5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    selectedJob === job
+                      ? 'bg-indigo-600 text-white shadow-md'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {job}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Expérience Minimale (Années)</label>
+              <input
+                type="number"
+                value={currentCriteria.minExp}
+                onChange={(e) => setCurrentCriteria({ ...currentCriteria, minExp: Number(e.target.value) })}
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Score d'Admissibilité Minimal (%)</label>
+              <input
+                type="number"
+                value={currentCriteria.minScore}
+                onChange={(e) => setCurrentCriteria({ ...currentCriteria, minScore: Number(e.target.value) })}
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Compétences Techniques Obilagatoires</label>
+            <div className="flex gap-2 mb-3">
+              <input
+                type="text"
+                value={newSkill}
+                onChange={(e) => setNewSkill(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddSkill())}
+                placeholder="Ex: Angular, Docker, Cisco..."
+                className="flex-1 px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={handleAddSkill}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 flex items-center gap-1 font-medium"
+              >
+                <Plus className="w-4 h-4" /> Ajouter
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {currentCriteria.requiredSkills.map((skill) => (
+                <span
+                  key={skill}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-sm font-medium"
+                >
+                  {skill}
+                  <button onClick={() => handleRemoveSkill(skill)} className="hover:text-red-500">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-slate-200 pt-6">
+            <h3 className="text-base font-semibold text-slate-800 mb-4">Pondération de l’Analyse IA (%)</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Compétences</label>
+                <input
+                  type="number"
+                  value={currentCriteria.weightSkills}
+                  onChange={(e) => setCurrentCriteria({ ...currentCriteria, weightSkills: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Expérience</label>
+                <input
+                  type="number"
+                  value={currentCriteria.weightExp}
+                  onChange={(e) => setCurrentCriteria({ ...currentCriteria, weightExp: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Formation</label>
+                <input
+                  type="number"
+                  value={currentCriteria.weightEdu}
+                  onChange={(e) => setCurrentCriteria({ ...currentCriteria, weightEdu: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-500 mb-1">Langues</label>
+                <input
+                  type="number"
+                  value={currentCriteria.weightLang}
+                  onChange={(e) => setCurrentCriteria({ ...currentCriteria, weightLang: Number(e.target.value) })}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              onClick={handleSave}
+              className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 flex items-center gap-2"
+            >
+              <Save className="w-5 h-5" /> Sauvegarder les critères
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Candidate {
+  id          String   @id @default(uuid())
+  fileName    String
+  format      String
+  fileSize    String
+  name        String
+  email       String?
+  phone       String?
+  rawContent  String   @db.Text
+  preview     String?
+  status      String   @default("EN_ATTENTE")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("candidates")
+}
