@@ -1,0 +1,96 @@
+Schéma : public
+
+=== archived_candidates (0 ligne(s)) ===
+  id  integer  NOT NULL  DEFAULT nextval('archived_candidates_id_seq'::regclass)
+  original_id  integer
+  name  character varying
+  job_title  character varying
+  country  character varying
+  email  character varying
+  phone  character varying
+  evaluation  jsonb
+  extracted_text  text
+  deleted_at  timestamp without time zone  DEFAULT CURRENT_TIMESTAMP
+  score  numeric
+  decision  character varying
+
+=== candidates (1 ligne(s)) ===
+  id  text  NOT NULL  DEFAULT (gen_random_uuid())::text
+  fileName  text  NOT NULL
+  format  text  NOT NULL
+  fileSize  text  NOT NULL
+  name  text  NOT NULL
+  email  text
+  phone  text
+  rawContent  text  NOT NULL
+  preview  text
+  status  text  NOT NULL  DEFAULT 'EN_ATTENTE'::text
+  createdAt  timestamp without time zone  NOT NULL  DEFAULT CURRENT_TIMESTAMP
+  updatedAt  timestamp without time zone  NOT NULL  DEFAULT CURRENT_TIMESTAMP
+  country  character varying
+  job_title  character varying
+  raw_text  text
+  evaluation  jsonb
+  job_code  character varying
+  sous_commission  character varying
+  score  numeric
+  decision  character varying
+  a_verifier  boolean  DEFAULT false
+  criteria_version  integer
+  evaluated_at  timestamp without time zone
+
+=== criteria_history (36 ligne(s)) ===
+  id  integer  NOT NULL  DEFAULT nextval('criteria_history_id_seq'::regclass)
+  job_code  character varying
+  job_title  character varying
+  version  integer
+  action  character varying
+  snapshot  jsonb  NOT NULL
+  created_at  timestamp without time zone  DEFAULT CURRENT_TIMESTAMP
+
+=== job_criteria (36 ligne(s)) ===
+  id  text  NOT NULL  DEFAULT (gen_random_uuid())::text
+  job_title  text  NOT NULL
+  min_education  text
+  min_experience_years  integer
+  required_skills  _text
+  updated_at  timestamp without time zone  DEFAULT CURRENT_TIMESTAMP
+  code  character varying
+  sous_commission  character varying
+  lieu  character varying
+  nombre_postes  integer  DEFAULT 1
+  categorie  character varying
+  nationalites_eligibles  jsonb  DEFAULT '["Mali", "Burkina Faso", "Niger"]'::jsonb
+  mission  text
+  min_education_rank  numeric  DEFAULT 3
+  diplome_domaines  jsonb  DEFAULT '[]'::jsonb
+  max_experience_years  integer
+  experience_domaines  jsonb  DEFAULT '[]'::jsonb
+  competences_techniques  jsonb  DEFAULT '[]'::jsonb
+  competences_comportementales  jsonb  DEFAULT '[]'::jsonb
+  langues_requises  jsonb  DEFAULT '["francais"]'::jsonb
+  regles_elimination  jsonb
+  seuils  jsonb
+  ponderations  jsonb
+  max_convoques  integer
+  source  character varying
+  a_confirmer  boolean  DEFAULT false
+  verrouille  boolean  DEFAULT false
+  actif  boolean  DEFAULT true
+  version  integer  DEFAULT 1
+  min_education_level  character varying
+
+=== sous_commissions (4 ligne(s)) ===
+  code  character varying  NOT NULL
+  libelle  character varying  NOT NULL
+  perimetre  text
+  ponderations  jsonb  NOT NULL  DEFAULT '{}'::jsonb
+  updated_at  timestamp without time zone  DEFAULT CURRENT_TIMESTAMP
+
+=== Contraintes ===
+  archived_candidates: PRIMARY KEY (id)
+  candidates: PRIMARY KEY (id)
+  criteria_history: PRIMARY KEY (id)
+  job_criteria: PRIMARY KEY (id)
+  job_criteria: UNIQUE (job_title)
+  sous_commissions: PRIMARY KEY (code)
